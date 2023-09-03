@@ -32,9 +32,10 @@
         return result
     }
 
-    function createJunkDiv(content) {
+    function createSingleJunkDiv(content) {
         var newDiv = document.createElement(generateRandomString(100));
         newDiv.style.position = 'fixed';
+        newDiv.style.zIndex = '-1000';
         newDiv.style.left = Math.random() * window.innerWidth * 2 - window.innerWidth + 'px';
         newDiv.style.top = Math.random() * window.innerHeight * 2 - window.innerHeight + 'px';
         newDiv.style.width = newDiv.style.height = "1000px";
@@ -49,11 +50,17 @@
         }
         return newDiv;
     }
+
+    function createJunkDiv(content) {
+        const newDiv = createSingleJunkDiv(content);
+        newDiv.append(createSingleJunkDiv())
+        return newDiv;
+    }
     function createAndInjectRandomDivs(numDivs, parent) {
         for (let i = 0; i < numDivs; i++) {
             const bodyChildren = Array.from(parent.children);
-            const junkDiv = createJunkDiv('Junk ' + (i + 1));
-            junkDiv.appendChild(createJunkDiv('SubJunk ' + (i + 1)));
+            const junkDiv = createJunkDiv(" ");
+            junkDiv.appendChild(createJunkDiv(" "));
 
             // Generate a random index
             const randomIndex = Math.floor(Math.random() * (bodyChildren.length + 1)) - 1;
@@ -68,6 +75,7 @@
     }
 
     function insertHTMLToRandomDiv(parentElement, htmlCode) {
+        if (parentElement == null) return;
         const childElements = parentElement.children;
         const randomIndex = Math.floor(Math.random() * childElements.length);
         if (childElements[randomIndex] == undefined) {
@@ -86,12 +94,35 @@
 
     function insertHTMLToRandomDivChild(parentElement, htmlCode) {
         const childElements = parentElement.children;
-        for (child of childElements) {
-            child.innerHTML = ""
-            child.append(createJunkDiv(""));
-        }
         const randomIndex = Math.floor(Math.random() * childElements.length);
         insertHTMLToRandomDiv(childElements[randomIndex], htmlCode);
+    }
+
+    function insertHTMLPartsToRandomDivChild(parentElement, htmlParts) {
+        const childElements = parentElement.children;
+        const startIndex = Math.floor(Math.random() * (childElements.length-5));
+        if (childElements.length - htmlParts.length <= startIndex) return insertHTMLPartsToRandomDivChild(parentElement, htmlParts);
+        console.log("START: " + startIndex)
+        console.log("CHILDREN: "+childElements.length)
+        let targetIndex = startIndex;
+        let insertCount = 0;
+        for (part of htmlParts) {
+            insertHTMLToRandomDiv(childElements[targetIndex], part);
+            const indexUsed = targetIndex + 1;
+            console.log("INDEX: " + indexUsed + " | " + part)
+            let iterations = 0;
+            while (true) {
+                targetIndex = indexUsed-1 + Math.floor(Math.random() * (childElements.length - indexUsed));
+                if(targetIndex == indexUsed) continue;
+                if(childElements.length-targetIndex <= htmlParts.length-insertCount) continue;
+                console.warn("K")
+                console.log(childElements.length-targetIndex)
+                console.log(htmlParts.length-insertCount)
+                break;
+                //if (childElements.length + insertCount - htmlParts.length <= targetIndex) continue;
+            }
+            insertCount++;
+        }
     }
 
     const originalBody =
@@ -106,23 +137,47 @@
     h1 {
         margin: 0;
     }
-</style>
-<h1>HTML Demo</h1>
-<hr>
+</style>|split|
+<h1>Page Obfuscator Demo</h1>|split|
+<hr>|split|
 <p style="width: 800px">
-    Welcome to this DEMO of the page obfuscator. Page obfuscator uses a variety of methods to obfuscate its html primarily element flooding.
+    Welcome to the DEMO of page obfuscator. Page obfuscator uses a variety of methods to obfuscate its html primarily element flooding.
     Element flooding is just the process of creating a complex repeating patterns in the html tree. We create this and load the input html using javascript.
     The javascript is obfuscated using a powerful private obfuscate JSobf which stops anyone trying to reverse the defense mechanisms.
     Element flooding also prevents any mouse interactions like highlighting and clicking this can be toggled off to still provide protection but allow for user interaction. 
     The default config also prevents any responsive design but this can be easily fixed by changing the responsive value in the config.
-</p>
-    `
+</p>|split|
+<button onclick="alert('presed button!')">Test!</button>
+    `.split("|split|");
 
-    const junkBody = createJunkDiv("")
-    junkBody.style = ""
-    createAndInjectRandomDivs(1500, junkBody)
-    insertHTMLToRandomDivChild(junkBody, originalBody)
-    document.body.append(junkBody);
+    function createJunkBody() {
+        const junkBody = createJunkDiv("")
+        junkBody.style = ""
+        createAndInjectRandomDivs(originalBody.length + 20, junkBody)
+        insertHTMLPartsToRandomDivChild(junkBody, originalBody)
+        return junkBody;
+    }
+
+    let lastJunkBody = "";
+    async function load() {
+        if (lastJunkBody != "") {
+            if (window.outerWidth - window.innerWidth > 160 || (heightThreshold = window.outerHeight - window.innerHeight > 160)) {
+                if (lastJunkBody != "") return;
+                const junkBody = createJunkBody();
+                document.body.append(junkBody);
+                while (document.body.children.length > 1) {
+                    document.body.children[0].remove();
+                }
+                lastJunkBody = junkBody;
+            }
+        } else {
+            const junkBody = createJunkBody();
+            document.body.append(junkBody);
+            lastJunkBody = junkBody;
+        }
+    }
+
+    setInterval(load, 5)
 </script>
 
 </html>
