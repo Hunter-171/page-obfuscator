@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hello World</title>
+</head>
+
+<body>
+
+</body>
+
+<script>
+    var elements = document.querySelectorAll('body *');
+    function generateRandomString(length) {
+        var result = '';
+        var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+        var charactersLength = characters.length;
+        for (var i = 0; i < length; i++) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        }
+        return result;
+    }
+
+    function generateRandomClassList(length, name_length) {
+        var result = ''
+        for (var i = 0; i < length; i++) {
+            result += generateRandomString(name_length) + " ";
+        }
+        return result
+    }
+
+    function createJunkDiv(content) {
+        var newDiv = document.createElement(generateRandomString(100));
+        newDiv.style.position = 'fixed';
+        newDiv.style.left = Math.random() * window.innerWidth * 2 - window.innerWidth + 'px';
+        newDiv.style.top = Math.random() * window.innerHeight * 2 - window.innerHeight + 'px';
+        newDiv.style.width = newDiv.style.height = "1000px";
+        newDiv.style.opacity = 1
+        newDiv.textContent = content;
+        newDiv.classList = generateRandomClassList(10, 10)
+        for (let i = 0; i < 10; i++) {
+            newDiv.setAttribute(generateRandomString(10), generateRandomString(10));
+        }
+        for (let i = 0; i < 10; i++) {
+            newDiv.style[generateRandomString(10)] = generateRandomString(10) + "px";
+        }
+        return newDiv;
+    }
+    function createAndInjectRandomDivs(numDivs, parent) {
+        for (let i = 0; i < numDivs; i++) {
+            const bodyChildren = Array.from(parent.children);
+            const junkDiv = createJunkDiv('Junk ' + (i + 1));
+            junkDiv.appendChild(createJunkDiv('SubJunk ' + (i + 1)));
+
+            // Generate a random index
+            const randomIndex = Math.floor(Math.random() * (bodyChildren.length + 1)) - 1;
+
+            // Insert the junkDiv at the random index
+            if (randomIndex === bodyChildren.length) {
+                parent.appendChild(junkDiv);
+            } else {
+                parent.insertBefore(junkDiv, bodyChildren[randomIndex]);
+            }
+        }
+    }
+
+    function insertHTMLToRandomDiv(parentElement, htmlCode) {
+        const childElements = parentElement.children;
+        const randomIndex = Math.floor(Math.random() * childElements.length);
+        if (childElements[randomIndex] == undefined) {
+            parentElement.innerHTML += htmlCode;
+            parentElement.style.position = "";
+            parentElement.style.left = "";
+            parentElement.style.top = "";
+            parentElement.style.width = "";
+            return;
+        }
+        childElements[randomIndex].innerHTML = htmlCode;
+        childElements[randomIndex].style = "";
+        parentElement.style = "";
+        parentElement.parentElement = "";
+    }
+
+    function insertHTMLToRandomDivChild(parentElement, htmlCode) {
+        const childElements = parentElement.children;
+        for (child of childElements) {
+            child.innerHTML = ""
+            child.append(createJunkDiv(""));
+        }
+        const randomIndex = Math.floor(Math.random() * childElements.length);
+        insertHTMLToRandomDiv(childElements[randomIndex], htmlCode);
+    }
+
+    const originalBody =
+        `
+<style>
+    body {
+        background-color: rgb(8,8,8);
+        color: white;
+        font-family: monospace;
+    }
+
+    h1 {
+        margin: 0;
+    }
+</style>
+<h1>HTML Demo</h1>
+<hr>
+<p style="width: 800px">
+    Welcome to this DEMO of the page obfuscator. Page obfuscator uses a variety of methods to obfuscate its html primarily element flooding.
+    Element flooding is just the process of creating a complex repeating patterns in the html tree. We create this and load the input html using javascript.
+    The javascript is obfuscated using a powerful private obfuscate JSobf which stops anyone trying to reverse the defense mechanisms.
+    Element flooding also prevents any mouse interactions like highlighting and clicking this can be toggled off to still provide protection but allow for user interaction. 
+    The default config also prevents any responsive design but this can be easily fixed by changing the responsive value in the config.
+</p>
+    `
+
+    const junkBody = createJunkDiv("")
+    junkBody.style = ""
+    createAndInjectRandomDivs(1500, junkBody)
+    insertHTMLToRandomDivChild(junkBody, originalBody)
+    document.body.append(junkBody);
+</script>
+
+</html>
