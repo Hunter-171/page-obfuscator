@@ -35,10 +35,10 @@
     function createSingleJunkDiv(content) {
         var newDiv = document.createElement(generateRandomString(100));
         newDiv.style.position = 'fixed';
-        newDiv.style.zIndex = '-1000';
+        newDiv.style.zIndex = ""+Math.round(Math.random()*-90000-10000);
         newDiv.style.left = Math.random() * window.innerWidth * 2 - window.innerWidth + 'px';
         newDiv.style.top = Math.random() * window.innerHeight * 2 - window.innerHeight + 'px';
-        newDiv.style.width = newDiv.style.height = "1000px";
+        newDiv.style.width = newDiv.style.height = (Math.random()*90000+10000)+"px";
         newDiv.style.opacity = 1
         newDiv.textContent = content;
         newDiv.classList = generateRandomClassList(10, 10)
@@ -100,29 +100,23 @@
 
     function insertHTMLPartsToRandomDivChild(parentElement, htmlParts) {
         const childElements = parentElement.children;
-        const startIndex = Math.floor(Math.random() * (childElements.length-5));
+        const startIndex = Math.floor(Math.random() * (childElements.length * 0.2));
         if (childElements.length - htmlParts.length <= startIndex) return insertHTMLPartsToRandomDivChild(parentElement, htmlParts);
         console.log("START: " + startIndex)
-        console.log("CHILDREN: "+childElements.length)
+        console.log("CHILDREN: " + childElements.length)
         let targetIndex = startIndex;
         let insertCount = 0;
         let lastIndex = 0;
         for (part of htmlParts) {
-            if(targetIndex == lastIndex) targetIndex++;
+            if (targetIndex == lastIndex) targetIndex++;
             insertHTMLToRandomDiv(childElements[targetIndex], part);
+            console.log(targetIndex)
             const indexUsed = targetIndex + 1;
             let iterations = 0;
-            while (true) {
-                targetIndex = indexUsed-1 + Math.floor(Math.random() * (childElements.length - indexUsed));
-                if(targetIndex == indexUsed) continue;
-                if(childElements.length-targetIndex <= htmlParts.length-insertCount) continue;
-                console.log("INDEX: " + indexUsed + " | " + part)
-                console.warn("K")
-                console.log(childElements.length-targetIndex)
-                console.log(htmlParts.length-insertCount)
-                lastIndex = indexUsed
-                break;
-                //if (childElements.length + insertCount - htmlParts.length <= targetIndex) continue;
+            let breakCount = 0;    
+            console.log("fun: " + (childElements.length - indexUsed), "elm: " + childElements.length)
+            while(indexUsed >= targetIndex && breakCount++ < 100) {
+                targetIndex = indexUsed + Math.floor(Math.random() * 0.5 * (childElements.length - indexUsed));
             }
             insertCount++;
         }
