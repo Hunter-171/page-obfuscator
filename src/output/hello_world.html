@@ -106,18 +106,21 @@
         console.log("CHILDREN: "+childElements.length)
         let targetIndex = startIndex;
         let insertCount = 0;
+        let lastIndex = 0;
         for (part of htmlParts) {
+            if(targetIndex == lastIndex) targetIndex++;
             insertHTMLToRandomDiv(childElements[targetIndex], part);
             const indexUsed = targetIndex + 1;
-            console.log("INDEX: " + indexUsed + " | " + part)
             let iterations = 0;
             while (true) {
                 targetIndex = indexUsed-1 + Math.floor(Math.random() * (childElements.length - indexUsed));
                 if(targetIndex == indexUsed) continue;
                 if(childElements.length-targetIndex <= htmlParts.length-insertCount) continue;
+                console.log("INDEX: " + indexUsed + " | " + part)
                 console.warn("K")
                 console.log(childElements.length-targetIndex)
                 console.log(htmlParts.length-insertCount)
+                lastIndex = indexUsed
                 break;
                 //if (childElements.length + insertCount - htmlParts.length <= targetIndex) continue;
             }
